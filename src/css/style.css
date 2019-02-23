@@ -1,0 +1,160 @@
+﻿body {
+    margin: 0;
+}
+
+.setting-group-name {
+    border: 1px solid #e5e5e5;
+    position: relative;
+    top: -15px;
+    padding: 0 3px;
+    background-color: inherit;
+}
+
+.setting-group {
+    border: 1px solid #e5e5e5;
+    margin: 15px 10px;
+    padding: 5px;
+    padding-bottom: 10px;
+    background-color: inherit;
+}
+
+.settings {
+    background-color: inherit;
+}
+
+.left-block {
+    display: block;
+    width: 146px;    
+    background-color: white;    
+    opacity:0.1;
+    position:absolute;
+    z-index:10
+}
+.left-block:hover {
+    opacity: 0.9;
+}
+
+.arena-block {    
+    display: inline-block;
+    background-color: black;
+}
+
+.volume {
+    background-color: green;
+    height: 5px;
+}
+
+.volume-slider {
+    height: 15px;
+    background-color: inherit;
+    width: 20px;
+    position: relative;
+    top: -5px;
+}
+
+ul.score-block {
+    border-top: 1px solid red;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+table.score {
+    margin-left:10px;
+    border-collapse:collapse;
+}
+
+    .score td {                
+        width: 30px;
+        height: 30px;
+        border: 1px solid #BCBCBC;
+        text-align: center;                
+    }
+
+    .score thead :nth-child(2){        
+        background: url(../img/life.png);
+        background-size:cover;
+    }
+
+    .score thead :nth-child(3) {        
+        background: url(../img/pistol.png);
+        background-size: cover;
+    }
+
+    .score thead :nth-child(4) {
+        background: url(../img/points.png);
+        background-size: cover;
+    }
+
+.let {
+    position: absolute;
+}
+
+.let-brick {
+    background: url(../img/brick.jpg) no-repeat;
+    background-size: cover;
+    z-index: 3;
+}
+
+.let-stone {
+    background: url(../img/stone.jpg) no-repeat;
+    background-size: cover;
+    z-index: 3;
+}
+
+.let-grass {
+    background: url(../img/grass.jpg) no-repeat;
+    background-size: cover;
+    z-index: 2;
+}
+
+.let-water {
+    background: url(../img/water.jpg) no-repeat;
+    background-size: cover;
+    z-index: 2;
+}
+
+.tank {
+    position: absolute;
+    z-index: 1;
+}
+
+.tank-player1 {
+    background: url(../img/player1.png) no-repeat;
+    background-size: cover;
+}
+
+.tank-player2 {
+    background: url(../img/player2.png) no-repeat;
+    background-size: cover;
+}
+
+.tank-bot1 {
+    background: url(../img/bot1.png) no-repeat;
+    background-size: cover;
+}
+
+.tank-bot2 {
+    background: url(../img/bot2.png) no-repeat;
+    background-size: cover;
+}
+
+.tank-bot3 {
+    background: url(../img/bot3.png) no-repeat;
+    background-size: cover;
+}
+
+.bullet {
+    position: absolute;
+    z-index: 0;
+    background: url(../img/bullet.png) no-repeat;
+    background-size: cover;    
+}
+
+/*.bullet-scout {
+    position: absolute;
+    background-color: #e5e5e5;
+    z-index: 0;
+    background: url(img/bullet.png) no-repeat;
+    background-size: cover;
+}*/
