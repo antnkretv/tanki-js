@@ -45,7 +45,7 @@ var Game = {
                 document.onmousemove = function (e) {
                     var val = e.pageX - slider.offsetWidth;
 
-                    if (val > 0 & val < max - slider.offsetWidth) {
+                    if (val > 0 && val < max - slider.offsetWidth) {
                         slider.style.left = val + 'px';
                         Game.config.volume = val / max * 100;
                     }
@@ -74,7 +74,7 @@ var Game = {
                 let t = Game.Tank.tanks.arr[i];
 
                 let tr = document.createElement('tr');
-                tr.id = t.type;
+                tr.id = t.id;
 
                 let tdImg = document.createElement('td');
                 tdImg.className = 'tank-img ' + t.type;
@@ -103,7 +103,7 @@ var Game = {
         for (let i = 0; i < Game.Tank.tanks.arr.length; i++) {
             let t = Game.Tank.tanks.arr[i];
 
-            let tr = document.getElementById(t.type);
+            let tr = document.getElementById(t.id);
             tr.getElementsByClassName('tank-life')[0].innerText = t.life;
             tr.getElementsByClassName('tank-bullet-quantity')[0].innerText = t.bulletQuantity;
             tr.getElementsByClassName('tank-score')[0].innerText = t.killTanks;
@@ -120,7 +120,7 @@ var Game = {
             else
                 playersRemaining++;
         }
-        if (playersRemaining != Game.playersCount
+        if (playersRemaining == 0
             || botRemaining == 0) {
 
             Game.final();
@@ -129,8 +129,14 @@ var Game = {
 
     final: () => {
         Game.playersCount = 0;
+        Game.botCount = 0;
         Game.Let.lets.removeAll();
         Game.Tank.tanks.removeAll();
+
+        // Сбрасываем таблицу счёта: в новой партии у танков другие id инстансов
+        var tbody = document.querySelector('.score tbody');
+        if (tbody) tbody.innerHTML = '';
+
         newGame();
     },
 }
@@ -142,6 +148,7 @@ Game.Tank = function (conf) {
     this.x = conf.x;
     this.y = conf.y;
     this.type = conf.type;
+    this.id = 'tank-instance-' + (Game.Tank.seq = (Game.Tank.seq || 0) + 1); // Уникальный id инстанса
     this.killTanks = Game.rating.score[this.type] || 0; // Очки
     this.name = conf.name;
     this.impactLife = conf.impactLife;
@@ -260,7 +267,7 @@ Game.Tank = function (conf) {
     }
 
     timerMoveId = setInterval(() => {
-        if (keyState[controls.s] & flagShot) {
+        if (keyState[controls.s] && flagShot) {
             shot.call(this);
             flagShot = false;
         }
@@ -303,10 +310,10 @@ Game.Tank = function (conf) {
     function move(moveFunc) {
         var newPos = moveFunc(this.x, this.y);
 
-        if (newPos.x < 0 | newPos.x + this.size > Game.config.arenaWidthUnit
-            | newPos.y < 0 | newPos.y + this.size > Game.config.arenaHeightUnit
-            | Game.Let.lets.get(newPos.x, newPos.y, this.size) != undefined
-            | Game.Tank.tanks.get(newPos.x, newPos.y, this.size, this) != undefined
+        if (newPos.x < 0 || newPos.x + this.size > Game.config.arenaWidthUnit
+            || newPos.y < 0 || newPos.y + this.size > Game.config.arenaHeightUnit
+            || Game.Let.lets.get(newPos.x, newPos.y, this.size) != undefined
+            || Game.Tank.tanks.get(newPos.x, newPos.y, this.size, this) != undefined
         ) {
             bot_isLetOnWay = true;
             return;
@@ -368,8 +375,6 @@ Game.Tank = function (conf) {
         clearInterval(timerMoveId);
         clearInterval(timerBotId);
         obj.remove();
-        delete obj;
-        delete this;
     }
 }
 
@@ -457,7 +462,7 @@ Game.Tank.configurations = {
         speed: 70,
         speedBullet: 10,
         controls: { l: 37, t: 38, r: 39, b: 40, s: 45 },
-        impactLife: 10,
+        impactLife: 50,
     },
     bot1: {
         bulletQuantity: 50,
@@ -560,8 +565,6 @@ Game.Bullet = function (conf) {
     this.crash = function () {
         clearInterval(timerId);
         bullet.remove();
-        delete bullet;
-        delete this;
     }
 
     function move() {
@@ -570,6 +573,7 @@ Game.Bullet = function (conf) {
             || this.x + stepLeft < 0
             || this.x + stepLeft + size > Game.config.arenaWidthUnit) {
             Game.Bullet.bullets.remove(this);
+            return;
         }
 
         this.x += stepLeft;
@@ -707,8 +711,6 @@ Game.Let = function (conf) {
 
     this.crash = function () {
         letWrapper.remove();
-        delete letWrapper;
-        delete this;
     }
 }
 
@@ -739,7 +741,7 @@ Game.Let.lets = {
                 x: pos.x,
                 y: pos.y,
                 size: LetsizeUnit,
-                type: Math.floor(Math.random() * 3)
+                type: Math.floor(Math.random() * 4)
             }))
         }
     },
@@ -799,7 +801,7 @@ function generateStartPos(size) {
         ah[i] = i * size;
     }
 
-    while (true) {
+    for (let attempt = 0; attempt < 1000; attempt++) {
         x = aw[Math.floor(Math.random() * aw.length)];
         y = ah[Math.floor(Math.random() * ah.length)];
         let l = Game.Let.lets.get(x, y, size, undefined);
@@ -809,6 +811,9 @@ function generateStartPos(size) {
             return { x: x, y: y }
         }
     }
+
+    // Не нашли свободную клетку за разумное число попыток — отдаём последнюю
+    return { x: x, y: y };
 }
 
 function getObjOfArr(arr, x, y, s, self) {
@@ -817,12 +822,11 @@ function getObjOfArr(arr, x, y, s, self) {
         if (l === self) continue;
 
         if (
-            ((l.y >= y & l.y < y + s) | (l.y <= y & l.y + l.size >= y + s) | (l.y + l.size > y & l.y + l.size <= y + s))
-            & ((l.x >= x & l.x < x + s) | (l.x <= x & l.x + l.size >= x + s) | (l.x + l.size > x & l.x + l.size <= x + s))
+            ((l.y >= y && l.y < y + s) || (l.y <= y && l.y + l.size >= y + s) || (l.y + l.size > y && l.y + l.size <= y + s))
+            && ((l.x >= x && l.x < x + s) || (l.x <= x && l.x + l.size >= x + s) || (l.x + l.size > x && l.x + l.size <= x + s))
         ) {
             if (l instanceof Game.Let
-                && (l.type == Game.Let.types.grass
-                    || l.type == Game.Let.types.grass)) {
+                && l.type == Game.Let.types.grass) {
                 continue;
             }
             return l;
